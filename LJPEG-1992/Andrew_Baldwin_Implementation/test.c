@@ -16,7 +16,7 @@
 void sanity_check() {
     srand(time(0));
     int num_of_tests = 10;
-    for(int i=16; i!=1; i--) {
+    for(int i=12; i>11; i--) {
         for(int j=0; j<num_of_tests; j++) {
             //create 2-image.
             uint16_t* input_image = malloc(IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(uint16_t));
@@ -30,9 +30,19 @@ void sanity_check() {
             //encode the image.
             uint8_t* encoded;
             int encodedLength;
-            if(lj92_encode(input_image, IMAGE_WIDTH*2, IMAGE_HEIGHT/2, i, IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(uint16_t), 0, NULL, 0, &encoded, &encodedLength) != LJ92_ERROR_NONE) {
+	    clock_t walltime;
+	    walltime = clock();
+	    for(int k=0; k<20; k++) {
+	      if(lj92_encode(input_image, IMAGE_WIDTH*2, IMAGE_HEIGHT/2, i, IMAGE_WIDTH*IMAGE_HEIGHT*sizeof(uint16_t), 0, NULL, 0, &encoded, &encodedLength) != LJ92_ERROR_NONE) {
                 ERROR_TERMINATE("Failed in encoding the image.");
-            }
+	      }
+	    }
+	    walltime = clock() - walltime;
+	    double time_taken = ((double) walltime)/CLOCKS_PER_SEC;
+	    time_taken /= 20.0;
+	    printf("LJ92 took %f seconds per image to run.\n", time_taken);
+	    printf("Throughput was %f megapixels per second.\n", (double)IMAGE_WIDTH*IMAGE_HEIGHT/(time_taken*1e6f));
+
             //try to open the image to decode it.
             lj92 decode;
             int w,h,bd;
